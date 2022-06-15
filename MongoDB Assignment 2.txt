@@ -1,0 +1,85 @@
+Assigbment 2-
+
+1)Filter the result where city is ATLANTA and state is GA.
+Ans- db.zipcode.find({city:"ATLANTA",state:"GA"}).pretty()
+
+2) Filter same As question 1 using aggregate $match function.
+Ans- db.zipcode.aggregate([{$match:{city:"ATLANTA",state:"GA"}}])
+Error-uncaught exception: SyntaxError: missing } after property list :
+@(shell):1:57 
+Occured-When Bracket is Missing
+
+3)use $group to count the number of zip code in atlanta.
+
+4)use $group to find the total population in atlanta.
+Ans-db.zipcode.aggregate({$group:{_id:{city:"$city"},population:{$sum:"$pop"}}})
+
+Population By State-
+
+ 1)Use aggregate to calculate the total population for each state.
+Ans- db.zipcode.aggregate( {$group:{ _id:"$state",population:{$sum:"$pop"}}})
+
+2)limit the result to just the first 3 result what are the top 3 states in population.
+Ans- ##-WRONG
+db.zipcode.aggregate({$limit:7}, {$group:{_id:{state:'$state'},population:{$sum:'$pop'}}},{$sort:{population:-1}})
+{ "_id" : { "state" : "MA" }, "population" : 78820 }
+Ans-##CORRECT db.zipcode.aggregate({$group:{_id:{state:'$state'},population:{$sum:'$pop'}}},{$sort:{population:-1}},{$limit:3})
+{ "_id" : { "state" : "CA" }, "population" : 29754890 }
+{ "_id" : { "state" : "NY" }, "population" : 17990402 }
+{ "_id" : { "state" : "TX" }, "population" : 16984601 }
+
+Population by City-
+
+1) use aggregate to calculate the total population for each city.
+Ans- db.zipcode.aggregate({$group:{_id:{city:'$city',state:'$state'},population: {$sum:'$pop'}}})
+
+2) sort the result by population highest first
+Ans- db.zipcode.aggregate({$group:{_id:{city:'$city',state:'$state'},population: {$sum:'$pop'}}},{$sort:{population:-1}})
+
+3)Limit the above result to just the first 3 result.
+Ans- db.zipcode.aggregate({$group:{_id:{city:'$city',state:'$state'},population: {$sum:'$pop'}}},{$sort:{population:-1}},{$limit:3})
+
+4) What are the Top 3 cities in population in texas.
+WRONG
+ db.zipcode.aggregate(**{state:"TX"}**,{$group:{_id:{city:'$city',state:'$state'},population: {$sum:'$pop'}}},{$sort:{population:-1}},{$limit:3},**{state:"TX"}**)
+uncaught exception: Error: command failed: {
+        "ok" : 0,
+        "errmsg" : "state is not allowed in this atlas tier",
+        "code" : 8000,
+        "codeName" : "AtlasError"
+
+Ans-db.zipcode.aggregate({$match:{state:"TX"}},{$group:{_id:{city:'$city',state:'$state'},population: {$sum:'$pop'}}},{$sort:{population:-1}},{$limit:3})
+{ "_id" : { "city" : "HOUSTON", "state" : "TX" }, "population" : 2095918 }
+{ "_id" : { "city" : "DALLAS", "state" : "TX" }, "population" : 940191 }
+{ "_id" : { "city" : "SAN ANTONIO", "state" : "TX" }, "population" : 811792 }
+
+BONUS-
+
+!)Write a Query to get the Avg city population for each state.
+Wrong-db.zipcode.aggregate({$group:{_id:{city:'$city',state:'$state,avgCityPop:{$avg:"$population"},population: {$sum:'$pop'}}})
+Ans-CORRECT- db.zipcode.aggregate({$group:{_id:"$city",avgPop:{$avg:"$pop"}}})
+{ "_id" : "BONFIELD", "avgPop" : 1189 }
+{ "_id" : "GREEN RIVER", "avgPop" : 7437.5 }
+{ "_id" : "FRESNO", "avgPop" : 25273.285714285714 }
+{ "_id" : "BROCKPORT", "avgPop" : 9569 }
+{ "_id" : "SOMONAUK", "avgPop" : 1475 }
+{ "_id" : "LITTLE SUAMICO", "avgPop" : 3506 }
+{ "_id" : "DOYLESBURG", "avgPop" : 905 }
+{ "_id" : "FRANCESTOWN", "avgPop" : 1219 }
+{ "_id" : "PRENTICE", "avgPop" : 1177 }
+{ "_id" : "WOOLSEY", "avgPop" : 35007 }
+{ "_id" : "DAFTER", "avgPop" : 2040 }
+{ "_id" : "MARBLE", "avgPop" : 4221 }
+{ "_id" : "HUMNOKE", "avgPop" : 992 }
+{ "_id" : "BLUE RAPIDS", "avgPop" : 1552 }
+{ "_id" : "GARWOOD", "avgPop" : 3254 }
+{ "_id" : "PARNELL", "avgPop" : 477.5 }
+{ "_id" : "GLADE SPRING", "avgPop" : 4384 }
+{ "_id" : "MC CLEARY", "avgPop" : 2644 }
+{ "_id" : "ARBELA", "avgPop" : 564 }
+{ "_id" : "WINDCREST", "avgPop" : 21781 }
+2)What are the top 3 states terms of average city population.
+Ans- db.zipcode.aggregate({$group:{_id:{city:"$city",state:"$state"},avgPop:{$avg:"$pop"}}},{$sort:{avgPop:-1}},{$limit:3})
+{ "_id" : { "city" : "BELL GARDENS", "state" : "CA" }, "avgPop" : 99568 }
+{ "_id" : { "city" : "NORWALK", "state" : "CA" }, "avgPop" : 94188 }
+{ "_id" : { "city" : "ARLETA", "state" : "CA" }, "avgPop" : 88114 }
